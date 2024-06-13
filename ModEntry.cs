@@ -62,6 +62,7 @@ namespace JumpKing_GamepadVibration
             }
             catch (Exception)
             {
+                // debug line missing here (but it doesn't matter)
                 Preference.Preferences = new Preferences();
                 XmlSerializerHelper.Serialize(AssemblyPath + "\\" + SETTINGS_FILE, Preference.Preferences);
             }
