@@ -9,6 +9,7 @@ using JumpKing_GamepadVibration.Model;
 using System;
 using System.Reflection;
 using JumpKing_GamepadVibration.Menu;
+using System.Diagnostics;
 
 namespace JumpKing_GamepadVibration
 {
@@ -16,7 +17,7 @@ namespace JumpKing_GamepadVibration
     public static class ModEntry
     {
 
-        public const string SETTINS_FILE = "YutaGoto.GamepadVibration.Settings.xml";
+        public const string SETTINGS_FILE = "YutaGoto.GamepadVibration.Settings.xml";
         private static string AssemblyPath { get; set; }
 
         [MainMenuItemSetting]
@@ -57,12 +58,12 @@ namespace JumpKing_GamepadVibration
             AssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             try
             {
-                Preference.Preferences = XmlSerializerHelper.Deserialize<Preferences>(AssemblyPath + "\\" + SETTINS_FILE);
+                Preference.Preferences = XmlSerializerHelper.Deserialize<Preferences>(AssemblyPath + "\\" + SETTINGS_FILE);
             }
             catch (Exception)
             {
                 Preference.Preferences = new Preferences();
-                XmlSerializerHelper.Serialize(AssemblyPath + "\\" + SETTINS_FILE, Preference.Preferences);
+                XmlSerializerHelper.Serialize(AssemblyPath + "\\" + SETTINGS_FILE, Preference.Preferences);
             }
 
             Preference.Preferences.PropertyChanged += SaveSettingsOnFile;
@@ -100,9 +101,12 @@ namespace JumpKing_GamepadVibration
             {
                 XmlSerializerHelper.Serialize(AssemblyPath + "\\YutaGoto.GamepadVibration.Settings.xml", Preference.Preferences);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-
+                // 95% of the time this won't happen,
+                // *BUT* when it does, at least you have a lead if the game crashes
+                // you can remove this if you dont want it :)
+                Debug.WriteLine($"[ERROR] [YutaGoto.JumpKing_GamepadVibration] {e.Message}");
             }
         }
     }
