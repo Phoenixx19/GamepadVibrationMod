@@ -6,6 +6,7 @@ using JumpKing.Player;
 using JumpKing_GamepadVibration.Model;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace JumpKing_GamepadVibration.Behaviour
 {
@@ -17,12 +18,23 @@ namespace JumpKing_GamepadVibration.Behaviour
 
         public bool ExecuteBehaviour(BehaviourContext behaviourContext)
         {
+            // if its not enabled, you can skip this
+            if (!Preference.Preferences.IsEnabled)
+                return true;
+
             BodyComp bodyComp = behaviourContext.BodyComp;
 
-            if (!Preference.Preferences.IsEnabled) return true;
+            // landed on ground vibration, if toggled
+            if (Preference.Preferences.IsLanded)
+            {
+                LandedVibration(bodyComp);
+            }
 
-            if (Preference.Preferences.IsLanded) LandedVibration(bodyComp);
-            if (Preference.Preferences.IsKnocked) KnockedVibration(behaviourContext);
+            // knocked vibration, if toggled
+            if (Preference.Preferences.IsKnocked)
+            {
+                KnockedVibration(behaviourContext);
+            }
 
             return true;
         }
@@ -43,7 +55,7 @@ namespace JumpKing_GamepadVibration.Behaviour
                 isLanded = true;
             }
 
-            SetVibration(power, power);
+            TrySetVibration(power, power);
         }
 
         private void KnockedVibration(BehaviourContext behaviourContext)
@@ -51,26 +63,38 @@ namespace JumpKing_GamepadVibration.Behaviour
             if (behaviourContext.ContainsKey("PlayBumpSFX"))
             {
                 setKnocked = true;
-                SetVibration(0f, 0f);
+                TrySetVibration(0f, 0f);
             }
             else
             {
                 if (setKnocked)
                 {
-                    SetVibration(0.3f, 0.3f);
+                    TrySetVibration(0.3f, 0.3f);
                     setKnocked = false;
 
                 }
                 else
                 {
-                    SetVibration(0f, 0f);
+                    TrySetVibration(0f, 0f);
                 }
             }
         }
 
-        private void SetVibration(float leftMotor, float rightMotor)
+        private float left;
+        private float right;
+
+        private void TrySetVibration(float leftMotor, float rightMotor)
         {
+            // dont call the vibration method too many times for no reason
+            if (leftMotor == this.left && rightMotor == this.right)
+                return;
+#if DEBUG
+            Debug.WriteLine($"Setting vibration to LEFT: {leftMotor} & RIGHT: {rightMotor}");
+#endif
             GamePad.SetVibration(PLAYER_ONE, leftMotor, rightMotor);
+
+            left = leftMotor;
+            right = rightMotor;
         }
     }
 }

@@ -55,6 +55,10 @@ namespace JumpKing_GamepadVibration
         [BeforeLevelLoad]
         public static void BeforeLevelLoad()
         {
+#if DEBUG
+            Debugger.Launch();
+#endif
+
             AssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             try
             {
